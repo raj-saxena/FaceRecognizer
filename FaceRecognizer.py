@@ -7,16 +7,7 @@ cascPath = "/usr/local/Cellar/opencv/2.4.13/share/OpenCV/haarcascades/haarcascad
 faceCascade = cv2.CascadeClassifier(cascPath)
 
 def getBigRectangle(faces):
-    # index = -1
-    # face = faces[0]
-    # (x, y, w, h) = face;
-    # area = (w - x) * (h - y)
-    # for (x, y, w, h) in faces:
-    #     if area >= (w - x) * (h - y):
-    #         area = (w - x) * (h - y)
-    #         index += 1
-    # return faces[index]
-    return max(faces, key=lambda (x, y, w, h): (w) * (h))
+    return max(faces, key=lambda (x, y, w, h): w * h)
 
 
 def readFrame(Time=20, Interval=2):
