@@ -4,6 +4,10 @@ import cv2
 import time
 from collections import Counter
 import numpy as np
+import sqlite3
+
+connection = sqlite3.connect('FaceRecognizer.db')
+dbCursor = connection.cursor()
 
 
 host = "10.136.23.38"  # Change this to machine IP
@@ -14,15 +18,26 @@ def enable_cors():
 
 @route('/train')
 def train():
+
+    dbCursor.execute("CREATE TABLE IF NOT EXISTS users( mapped_id INTEGER PRIMARY KEY AUTOINCREMENT,uuid TEXT NOT NULL UNIQUE );")
+
     uuid = request.query['uuid']
     print "uuid=>'%s'" % uuid
     if not uuid:
         return "Invalid Action"  # Empty string is False
 
-    uuid = "786"  # hard-coding for now till DB isn't present
-    trainMe(uuid)
-    return "trained for ", uuid
-
+    try:
+        dbCursor.execute("INSERT INTO users(uuid) values(?)", (uuid,))
+        dbCursor.execute("SELECT mapped_id FROM users WHERE uuid = ?", (uuid,))
+        mapped_id = dbCursor.fetchone()[0]
+        connection.commit()
+        print mapped_id
+        trainMe(mapped_id)
+        #p = Process(target=trainMe, args=(mapped_id,))
+        #p.start()
+        return "trained"
+    except sqlite3.IntegrityError:
+        return "I Know You"
 
 @route('/predict')
 def predict():
@@ -37,8 +52,17 @@ def predict():
     # p.start()
     # p.join()
     # print 'Predicted', predicted.value
+
     predicted = recognizeFace()
-    return str(predicted)
+    dbCursor.execute("SELECT uuid FROM users WHERE mapped_id = ?", (predicted,))
+    result = dbCursor.fetchone()
+
+    print 'result',result
+    if result is not None:
+        returnString = "You are %s" % (result[0],)
+        return returnString
+    return "Unable to Recognize You"
+
 
 
 file = 'learnedData'
@@ -60,7 +84,7 @@ def trainMe(label):
     photos = readFrame(10)
     # Change the lavel for every learning
     # For face recognition we will the the LBPH Face Recognizer
-    label = int(label)
+    #label = int(label)
     labels = [label for i in range(len(photos))]
 
     cv2.namedWindow('face')
