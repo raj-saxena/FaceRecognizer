@@ -1,16 +1,20 @@
 import serial
 import re
 import time
-import httplib
+import httplib, urllib, ssl
+from JsonExtractor import *
+from BahmniServerHelper import BahmniServerHelper
 
 port = "/dev/cu.usbmodem1421"
 baudRate = 9600
 
 threshold = 32
+uname = "superman"
+pswd = "Admin123"
 
 print "Monitoring temperature"
 
-ser = serial.Serial(port, baudRate)
+ser = None  # serial.Serial(port, baudRate)
 
 
 def getAbsoluteTemperatureFromSerial():
@@ -25,21 +29,38 @@ def getAverageValue():
     return reduce(lambda x, y: x + y, readings) / float(len(readings))
 
 
-def recognizePatientAndUpdateObservation(avgValue):
-    print "Firing request to recognize patient"
-    conn = httplib.HTTPConnection('localhost', 8080)
-    conn.request("GET", "/predict")
-    resp = conn.getresponse()
-    result = resp.read()
-    print resp.status, resp.reason, result
+def recognizePatientAndUpdateObservation(key, avgValue):
+    # print "Firing request to recognize patient"
+    # conn = httplib.HTTPConnection('localhost', 8080)
+    # conn.request("GET", "/predict")
+    # resp = conn.getresponse()
+    # result = resp.read()
+    # print resp.status, resp.reason, result
+    # conn.close()
+
+    uuid = "2e9be152-992e-4a07-844f-357d55c59de3"
+
+    payload = setObservationValue(uuid, key, avgValue, payloadTemperature)
+    print "Saving in Bahmni =>", uuid, "=>", payload
+    # print payload
+    headers = {"Content-type": "application/json;charset=UTF-8",
+               'Cookie': BahmniServerHelper().getAuthenticatedCookie(uname, pswd)}
+    # print headers
+    conn = httplib.HTTPSConnection("192.168.33.10", context=ssl._create_unverified_context())
+    conn.request("POST", "/openmrs/ws/rest/v1/bahmnicore/bahmniencounter", payload, headers)
+    response = conn.getresponse()
+    respBody = response.read()
+    # print respBody
+    print "Response => ", response.status, "=>", respBody
     conn.close()
-    print "Saving in Bahmni =>"
-
-    #conn = httplib.HTTPConnection("https://192.168.33.10/openmrs/ws/rest/v1/bahmnicore/bahmniencounter")
-    time.sleep(5)
+    # print "saved in Bahmni"
+    time.sleep(3)
 
 
-while True:
+recognizePatientAndUpdateObservation('Temperature', 102)
+
+
+while False:
     value = getAbsoluteTemperatureFromSerial()
     isValid = value > threshold
     if isValid:
