@@ -1,10 +1,13 @@
-import cv2, time, numpy as np
 import os
 from collections import Counter
 
+import cv2
+import numpy as np
+import time
 
 cascPath = "/usr/local/Cellar/opencv/2.4.13/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml"
 faceCascade = cv2.CascadeClassifier(cascPath)
+
 
 def getBigRectangle(faces):
     return max(faces, key=lambda (x, y, w, h): w * h)
@@ -37,12 +40,6 @@ def readFrame(Time=20, Interval=2):
             if len(faces) != 0:
                 (x, y, w, h) = getBigRectangle(faces)
                 facePhoto.append(gray[y:y + h, x:x + w])
-                # if len(faces) == 1:
-                #     # facePhoto.append(frame)
-                #     print type(faces[0])
-                #     for (x, y, w, h) in faces:
-                #         face = gray[y:y + h, x:x + w]
-                #         facePhoto.append(face)
                 for (x, y, w, h) in faces:
                     cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
                     # Display the resulting frame

@@ -1,48 +1,47 @@
-from bottle import route, run, hook, response, request
-from FaceRecognizer import Recognizer, readFrame
-import cv2
 import time
 from collections import Counter
+
+import cv2
 import numpy as np
+from bottle import route, run, hook, response, request
+
+from DB import DB
 import sqlite3
+from FaceRecognizer import Recognizer, readFrame
 
-connection = sqlite3.connect('FaceRecognizer.db')
-dbCursor = connection.cursor()
+host = "10.136.20.77"  # Change this to machine IP
+port = 8080
 
-host = "10.136.23.38"  # Change this to machine IP
 
 @hook('after_request')
 def enable_cors():
     response.headers['Access-Control-Allow-Origin'] = '*'
 
 
+db = DB()
+
+
 @route('/train')
 def train():
-
-    dbCursor.execute("CREATE TABLE IF NOT EXISTS users( mapped_id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                     "uuid TEXT NOT NULL UNIQUE );")
-
     uuid = request.query['uuid']
     print "uuid=>'%s'" % uuid
     if not uuid:
         return "Invalid Action"  # Empty string is False
-
     try:
-        dbCursor.execute("INSERT INTO users(uuid) values(?)", (uuid,))
-        dbCursor.execute("SELECT mapped_id FROM users WHERE uuid = ?", (uuid,))
-        mapped_id = dbCursor.fetchone()[0]
-        connection.commit()
-        print mapped_id
-        trainMe(mapped_id)
-        return "trained"
+        mappedId = db.add(uuid)
+        trainForFace(mappedId)
+        return "Trained for %s => %s " % uuid, mappedId
     except sqlite3.IntegrityError:
+        print "User with uuid=%s already exists, initiating re-training."
+        mappedId = db.getId(uuid)
+        trainForFace(mappedId)
         return "I Know You"
+
 
 @route('/predict')
 def predict():
-    predicted = recognizeFace()
-    dbCursor.execute("SELECT uuid FROM users WHERE mapped_id = ?", (predicted,))
-    result = dbCursor.fetchone()
+    predictedId = recognizeFace()
+    result = getUUID(predictedId)
 
     print 'result', result
     if result is not None:
@@ -51,11 +50,17 @@ def predict():
     return "Unable to Recognize You"
 
 
+def getUUID(predictedId):
+    result = db.getUuid(predictedId)
+    return result
+
+
 file = 'learnedData.yml'
 faceRecognizer = Recognizer(file)
 
 
 def recognizeFace():
+    predictedFace = None
     photos = readFrame(10)
     if len(photos) != 0:
         predicted = faceRecognizer.predict(photos)
@@ -66,10 +71,10 @@ def recognizeFace():
     return predictedFace
 
 
-def trainMe(label):
+def trainForFace(label):
     photos = readFrame(10)
     # For face recognition we will the the LBPH Face Recognizer
-    #label = int(label)
+    # label = int(label)
     labels = [label for i in range(len(photos))]
 
     cv2.namedWindow('face')
@@ -83,4 +88,4 @@ def trainMe(label):
     print "captured and trained for => " + str(labels)
 
 
-run(host=host, port=8080, debug=True)
+run(host=host, port=port, debug=True)

@@ -4,6 +4,7 @@ import time
 import httplib, urllib, ssl
 from JsonExtractor import *
 from BahmniServerHelper import BahmniServerHelper
+from HttpServer import host, port
 
 port = "/dev/cu.usbmodem1421"
 baudRate = 9600
@@ -30,13 +31,13 @@ def getAverageValue():
 
 
 def recognizePatientAndUpdateObservation(key, avgValue):
-    # print "Firing request to recognize patient"
-    # conn = httplib.HTTPConnection('localhost', 8080)
-    # conn.request("GET", "/predict")
-    # resp = conn.getresponse()
-    # result = resp.read()
-    # print resp.status, resp.reason, result
-    # conn.close()
+    print "Firing request to recognize patient"
+    conn = httplib.HTTPConnection(host, port)
+    conn.request("GET", "/predict")
+    resp = conn.getresponse()
+    result = resp.read()
+    print resp.status, resp.reason, result
+    conn.close()
 
     uuid = "2e9be152-992e-4a07-844f-357d55c59de3"
 
