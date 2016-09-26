@@ -1,67 +1,11 @@
-import os
-from collections import Counter
-
+from PyQt4 import QtCore, QtGui, uic
+import sys
 import cv2
+import os
 import numpy as np
-import time
 
-cascPath = "/usr/local/Cellar/opencv/2.4.13/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml"
-faceCascade = cv2.CascadeClassifier(cascPath)
-
-
-def getBigRectangle(faces):
-    return max(faces, key=lambda (x, y, w, h): w * h)
-
-
-def readFrame(Time=20, Interval=2):
-    camera = cv2.VideoCapture(0)
-    cv2.namedWindow('Video', cv2.WINDOW_NORMAL)
-    cv2.startWindowThread()
-
-    facePhoto = list()
-    interval_start = start = time.time()
-
-    while True:
-        isFrameReadCorrectly, frame = camera.read()
-
-        # if isFrameReadCorrectly:
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = detectFacesInVideo(gray)
-
-        # Draw a rectangle around the faces
-        for (x, y, w, h) in faces:
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            # Display the resulting frame
-            cv2.imshow('Video', frame)
-            cv2.waitKey(60)
-
-        if time.time() - interval_start >= Interval:
-            print "faces detected => ", len(faces)
-            if len(faces) != 0:
-                (x, y, w, h) = getBigRectangle(faces)
-                facePhoto.append(gray[y:y + h, x:x + w])
-                for (x, y, w, h) in faces:
-                    cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                    # Display the resulting frame
-                    cv2.imshow('frame', frame)
-                    cv2.waitKey(200)
-            interval_start = time.time()
-
-        if time.time() - start >= Time: break
-    cv2.destroyAllWindows()
-    cv2.waitKey(1)
-    camera.release()
-    return facePhoto
-
-
-def detectFacesInVideo(gray):
-    return faceCascade.detectMultiScale(
-        gray,
-        scaleFactor=1.1,
-        minNeighbors=5,
-        minSize=(100, 100),
-        flags=cv2.CASCADE_SCALE_IMAGE
-    )
+form_class = uic.loadUiType("simple.ui")[0]
+xml_file = "/usr/local/Cellar/opencv3/3.1.0_4/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml"
 
 
 class Recognizer:
@@ -81,36 +25,114 @@ class Recognizer:
         self.recognizer.load(self.file)
         predicted = list()
         for photo in photos:
-            nbr_predicted = self.recognizer.predict(photo)
+            nbr_predicted, conf = self.recognizer.predict(photo)
             predicted.append(nbr_predicted)
         return predicted
 
 
+def getBigRectangle(faces):
+    print max(faces, key=lambda (x, y, w, h): (w) * (h))
+    return max(faces, key=lambda (x, y, w, h): (w) * (h))
+
+
+class OwnImageWidget(QtGui.QWidget):
+    def __init__(self, parent=None):
+        super(OwnImageWidget, self).__init__(parent)
+        self.image = None
+
+    def setImage(self, image):
+        self.image = image
+        sz = image.size()
+        self.setMinimumSize(sz)
+        self.update()
+
+    def paintEvent(self, event):
+        qp = QtGui.QPainter()
+        qp.begin(self)
+        if self.image:
+            qp.drawImage(QtCore.QPoint(0, 0), self.image)
+        qp.end()
+
+
+class FaceRecognizerWindow(QtGui.QMainWindow, form_class):
+    def __init__(self, photos, parent=None):
+        QtGui.QMainWindow.__init__(self, parent, QtCore.Qt.WindowStaysOnTopHint)
+        self.setupUi(self)
+
+        self.faceCascade = cv2.CascadeClassifier(xml_file)
+
+        self.capture = cv2.VideoCapture(0)
+        self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+        self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+        self.capture.set(cv2.CAP_PROP_FPS, 30)
+
+        self.window_width = self.ImgWidget.frameSize().width()
+        self.window_height = self.ImgWidget.frameSize().height()
+        self.ImgWidget = OwnImageWidget(self.ImgWidget)
+
+        self.photos = photos
+
+        self.timer = QtCore.QTimer(self)
+        self.timer.timeout.connect(self.update_frame)
+        self.timer.start(1)
+
+    def update_frame(self):
+
+        # print len(self.photos)
+        if len(self.photos) == 10:
+            self.capture.release()
+            cv2.destroyAllWindows()
+            QtCore.QCoreApplication.instance().quit()
+
+        if len(self.photos) == 10:
+            # Because of latency in closing this function might called even quit is called.
+            return
+
+        isFrameReadCorrectly, img = self.capture.read()
+
+        if isFrameReadCorrectly:
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            faces = self.faceCascade.detectMultiScale(
+                gray,
+                scaleFactor=1.1,
+                minNeighbors=5,
+                minSize=(30, 30),
+                flags=cv2.CASCADE_SCALE_IMAGE
+            )
+
+            if len(faces):
+                (x, y, w, h) = getBigRectangle(faces)
+                cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                # self.photos.append((x, y, w, h))
+                self.photos.append(gray[y:y + h, x:x + w])
+
+        img_height, img_width, img_colors = img.shape
+        scale_w = float(self.window_width) / float(img_width)
+        scale_h = float(self.window_height) / float(img_height)
+        scale = min([scale_w, scale_h])
+
+        if scale == 0:
+            scale = 1
+
+        img = cv2.resize(img, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        height, width, bpc = img.shape
+        bpl = bpc * width
+        image = QtGui.QImage(img.data, width, height, bpl, QtGui.QImage.Format_RGB888)
+        self.ImgWidget.setImage(image)
+
+
 if __name__ == '__main__':
-    file = 'learnedData'
-    faceRecognizer = Recognizer(file)
-    mode = 1
-    if not mode:  # Train
-        photos = readFrame(10)
-        # Change the lavel for every learning
-        label = 02
-        # For face recognition we will the the LBPH Face Recognizer
-        labels = [label for i in range(len(photos))]
-        print labels
+    app = QtGui.QApplication(sys.argv)
+    Photos = []
+    w = FaceRecognizerWindow(Photos, None)
+    w.setWindowTitle('Face Recognizer')
+    w.show()
+    app.exec_()
 
-        cv2.namedWindow('face')
-        print len(photos)
-        for faces in photos:
-            cv2.imshow('face', faces)
-            cv2.waitKey(60)
-            time.sleep(1)
-        # Train
-        faceRecognizer.update(photos, np.array(labels))
-        cv2.namedWindow('face')
+    print Photos
 
-    else:  # predict
-        photos = readFrame(10)
-        if len(photos) != 0:
-            predicted = faceRecognizer.predict(photos)
-            data = Counter(predicted)
-            print "Predicted", data.most_common(1)[0][0]
+    cv2.namedWindow('frame')
+    for photo in Photos:
+        cv2.imshow('frame', photo)
+        cv2.waitKey(60)

@@ -12,12 +12,11 @@ class DB:
     def add(self, uuid):
         self.dbCursor.execute("INSERT INTO users(uuid) values(?)", (uuid,))
         mappedId = self.getId(uuid)
-        global connection
-        connection.commit()
+        self.connection.commit()
         return mappedId
 
     def getId(self, uuid):
-        self.dbCursor.execute("SELECT mappedId FROM users WHERE uuid = ?", (uuid,))
+        self.dbCursor.execute("SELECT mapped_id FROM users WHERE uuid = ?", (uuid,))
         mappedId = self.dbCursor.fetchone()[0]
         return mappedId
 

@@ -1,4 +1,3 @@
-import time
 from collections import Counter
 
 import cv2
@@ -7,9 +6,12 @@ from bottle import route, run, hook, response, request
 
 from DB import DB
 import sqlite3
-from FaceRecognizer import Recognizer, readFrame
+from FaceRecognizer import Recognizer, FaceRecognizerWindow
 
-host = "10.136.20.77"  # Change this to machine IP
+from PyQt4 import QtGui
+from multiprocessing import Process, Manager
+
+host = "10.136.20.212"  # Change this to machine IP
 port = 8080
 
 
@@ -29,18 +31,25 @@ def train():
         return "Invalid Action"  # Empty string is False
     try:
         mappedId = db.add(uuid)
-        trainForFace(mappedId)
-        return "Trained for %s => %s " % uuid, mappedId
+        p = Process(target=trainForFace, args=(mappedId,))
+        p.start()
+        return "Trained for " + uuid + " =>" + str(mappedId)
     except sqlite3.IntegrityError:
-        print "User with uuid=%s already exists, initiating re-training."
+        print "User with uuid=%s already exists,"  # initiating re-training."
         mappedId = db.getId(uuid)
-        trainForFace(mappedId)
+        # p = Process(target=trainForFace, args=(mappedId,))
+        # p.start()
         return "I Know You"
 
 
 @route('/predict')
 def predict():
-    predictedId = recognizeFace()
+    predicted = Manager().Value('i', 0)
+    p = Process(target=recognizeFace, args=(predicted,))
+    p.start()
+    p.join()
+
+    predictedId = predicted.value
     result = getUUID(predictedId)
 
     print 'result', result
@@ -61,7 +70,12 @@ faceRecognizer = Recognizer(file)
 
 def recognizeFace():
     predictedFace = None
-    photos = readFrame(10)
+    app = QtGui.QApplication(["Test"])
+    photos = []
+    w = FaceRecognizerWindow(photos, None)
+    w.setWindowTitle('Face Recognizer')
+    w.show()
+    app.exec_()
     if len(photos) != 0:
         predicted = faceRecognizer.predict(photos)
         data = Counter(predicted)
@@ -72,16 +86,21 @@ def recognizeFace():
 
 
 def trainForFace(label):
-    photos = readFrame(10)
+    app = QtGui.QApplication(["Train"])
+    photos = []
+    w = FaceRecognizerWindow(photos, None)
+    w.setWindowTitle('Face Recognizer')
+    w.show()
+    app.exec_()
     # For face recognition we will the the LBPH Face Recognizer
     # label = int(label)
     labels = [label for i in range(len(photos))]
 
-    cv2.namedWindow('face')
-    for faces in photos:
-        cv2.imshow('face', faces)
-        cv2.waitKey(60)
-        time.sleep(1)
+    # cv2.namedWindow('face')
+    # for faces in photos:
+    #     cv2.imshow('face', faces)
+    #     cv2.waitKey(60)
+    #     time.sleep(1)
     # Train
     faceRecognizer.update(photos, np.array(labels))
     cv2.destroyAllWindows()
