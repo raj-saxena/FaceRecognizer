@@ -11,7 +11,7 @@ from FaceRecognizer import Recognizer, FaceRecognizerWindow
 from PyQt4 import QtGui
 from multiprocessing import Process, Manager
 
-host = "10.136.20.212"  # Change this to machine IP
+host = "10.136.21.50"  # Change this to machine IP
 port = 8080
 
 

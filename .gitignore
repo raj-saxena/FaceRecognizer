@@ -2,3 +2,4 @@
 .idea
 learnedData
 FaceRecognizer.db
+*.pyc
