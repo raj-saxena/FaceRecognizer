@@ -3,6 +3,7 @@ import sys
 import cv2
 import os
 import numpy as np
+import time
 
 form_class = uic.loadUiType("simple.ui")[0]
 xml_file = "/usr/local/Cellar/opencv3/3.1.0_4/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml"
@@ -25,7 +26,8 @@ class Recognizer:
         self.recognizer.load(self.file)
         predicted = list()
         for photo in photos:
-            nbr_predicted, conf = self.recognizer.predict(photo)
+            # nbr_predicted, conf = self.recognizer.predict(photo)
+            nbr_predicted = self.recognizer.predict(photo)
             predicted.append(nbr_predicted)
         return predicted
 
@@ -72,19 +74,21 @@ class FaceRecognizerWindow(QtGui.QMainWindow, form_class):
 
         self.photos = photos
 
+        self.time = time.time()
+
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.update_frame)
         self.timer.start(1)
 
     def update_frame(self):
-
+        currentTime =  time.time()
         # print len(self.photos)
-        if len(self.photos) == 10:
+        if len(self.photos) == 8:
             self.capture.release()
             cv2.destroyAllWindows()
             QtCore.QCoreApplication.instance().quit()
 
-        if len(self.photos) == 10:
+        if len(self.photos) == 8:
             # Because of latency in closing this function might called even quit is called.
             return
 
@@ -96,7 +100,7 @@ class FaceRecognizerWindow(QtGui.QMainWindow, form_class):
                 gray,
                 scaleFactor=1.1,
                 minNeighbors=5,
-                minSize=(30, 30),
+                minSize=(100, 100),
                 flags=cv2.CASCADE_SCALE_IMAGE
             )
 
@@ -104,7 +108,9 @@ class FaceRecognizerWindow(QtGui.QMainWindow, form_class):
                 (x, y, w, h) = getBigRectangle(faces)
                 cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
                 # self.photos.append((x, y, w, h))
-                self.photos.append(gray[y:y + h, x:x + w])
+                if currentTime - self.time >= 2:
+                    self.photos.append(gray[y:y + h, x:x + w])
+                    self.time = time.time()
 
         img_height, img_width, img_colors = img.shape
         scale_w = float(self.window_width) / float(img_width)

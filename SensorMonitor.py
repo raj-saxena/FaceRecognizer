@@ -4,18 +4,19 @@ import time
 import httplib, urllib, ssl
 from JsonExtractor import *
 from BahmniServerHelper import BahmniServerHelper
-from HttpServer import host, port
+# from HttpServer import host, port
+import HttpServer
 
 port = "/dev/cu.usbmodem1421"
 baudRate = 9600
 
-threshold = 32
+threshold = 27
 uname = "superman"
 pswd = "Admin123"
 
 print "Monitoring temperature"
 
-ser = None  # serial.Serial(port, baudRate)
+ser = serial.Serial(port, baudRate)
 
 
 def getAbsoluteTemperatureFromSerial():
@@ -32,7 +33,9 @@ def getAverageValue():
 
 def recognizePatientAndUpdateObservation(key, avgValue):
     print "Firing request to recognize patient"
-    conn = httplib.HTTPConnection(host, port)
+    print HttpServer.host,HttpServer.port
+    conn = httplib.HTTPConnection(HttpServer.host, HttpServer.port)
+    print conn
     conn.request("GET", "/predict")
     resp = conn.getresponse()
     result = resp.read()
@@ -58,17 +61,16 @@ def recognizePatientAndUpdateObservation(key, avgValue):
     time.sleep(3)
 
 
-recognizePatientAndUpdateObservation('Temperature', 102)
+# recognizePatientAndUpdateObservation('Temperature', 25)
 
-
-while False:
+while True:
     value = getAbsoluteTemperatureFromSerial()
     isValid = value > threshold
     if isValid:
         print "calculating avg temp =>"
         avgValue = getAverageValue()
         print avgValue
-        recognizePatientAndUpdateObservation(avgValue)
+        recognizePatientAndUpdateObservation('Temperature', avgValue)
         isValid = False
         value = getAbsoluteTemperatureFromSerial()
         while value > threshold:
@@ -79,5 +81,3 @@ while False:
         print "value=%.2f smaller than threshold." % value
 
     time.sleep(2)
-
-
