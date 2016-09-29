@@ -1,5 +1,5 @@
 int val;
-int tempPin = 1;
+int tempPin = 0;
 
 void setup() {
 Serial.begin(9600);

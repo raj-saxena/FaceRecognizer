@@ -11,7 +11,7 @@ from FaceRecognizer import Recognizer, FaceRecognizerWindow
 from PyQt4 import QtGui
 from multiprocessing import Process, Manager
 
-host = "10.136.21.132"  # Change this to machine IP
+host = "10.136.21.206"  # Change this to machine IP
 port = 8080
 
 
@@ -72,7 +72,7 @@ def recognizeFace(predictedFace):
     predictedFace.value = None
     app = QtGui.QApplication(["Test"])
     photos = []
-    w = FaceRecognizerWindow(photos, None)
+    w = FaceRecognizerWindow(photos, 4, 2, None)
     w.setWindowTitle('Face Recognizer')
     w.show()
     app.exec_()
@@ -90,7 +90,7 @@ def recognizeFace(predictedFace):
 def trainForFace(label):
     app = QtGui.QApplication(["Train"])
     photos = []
-    w = FaceRecognizerWindow(photos, None)
+    w = FaceRecognizerWindow(photos, 8, 2, None)
     w.setWindowTitle('Face Recognizer')
     w.show()
     app.exec_()
@@ -107,6 +107,7 @@ def trainForFace(label):
     faceRecognizer.update(photos, np.array(labels))
     cv2.destroyAllWindows()
     print "captured and trained for => " + str(labels)
+
 
 if __name__ == '__main__':
     run(host=host, port=port, debug=True)

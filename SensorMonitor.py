@@ -10,7 +10,7 @@ import HttpServer
 port = "/dev/cu.usbmodem1421"
 baudRate = 9600
 
-threshold = 27
+threshold = 90
 uname = "superman"
 pswd = "Admin123"
 
@@ -28,24 +28,24 @@ def getAverageValue():
     readings = []
     for i in range(1, 11):
         readings.append(getAbsoluteTemperatureFromSerial())
-    return reduce(lambda x, y: x + y, readings) / float(len(readings))
+    return round(reduce(lambda x, y: x + y, readings) / float(len(readings)), 2)
 
 
 def recognizePatientAndUpdateObservation(key, avgValue):
     print "Firing request to recognize patient"
-    print HttpServer.host,HttpServer.port
+    #print HttpServer.host,HttpServer.port
     conn = httplib.HTTPConnection(HttpServer.host, HttpServer.port)
-    print conn
+    # print conn
     conn.request("GET", "/predict")
     resp = conn.getresponse()
     result = resp.read()
-    print resp.status, resp.reason, result
+    print resp.status, resp.reason, result, avgValue
     conn.close()
 
-    uuid = "2e9be152-992e-4a07-844f-357d55c59de3"
+    uuid = result.split()[2]
 
     payload = setObservationValue(uuid, key, avgValue, payloadTemperature)
-    print "Saving in Bahmni =>", uuid, "=>", payload
+    print "Saving in Bahmni =>", uuid, avgValue, #, "=>", payload
     # print payload
     headers = {"Content-type": "application/json;charset=UTF-8",
                'Cookie': BahmniServerHelper().getAuthenticatedCookie(uname, pswd)}
@@ -55,7 +55,7 @@ def recognizePatientAndUpdateObservation(key, avgValue):
     response = conn.getresponse()
     respBody = response.read()
     # print respBody
-    print "Response => ", response.status, "=>", respBody
+    print "Response => ", response.status#, "=>", respBody
     conn.close()
     # print "saved in Bahmni"
     time.sleep(3)

@@ -57,7 +57,7 @@ class OwnImageWidget(QtGui.QWidget):
 
 
 class FaceRecognizerWindow(QtGui.QMainWindow, form_class):
-    def __init__(self, photos, parent=None):
+    def __init__(self, photos, noOfFrames, interval, parent=None):
         QtGui.QMainWindow.__init__(self, parent, QtCore.Qt.WindowStaysOnTopHint)
         self.setupUi(self)
 
@@ -72,6 +72,8 @@ class FaceRecognizerWindow(QtGui.QMainWindow, form_class):
         self.window_height = self.ImgWidget.frameSize().height()
         self.ImgWidget = OwnImageWidget(self.ImgWidget)
 
+        self.noOfFrames = noOfFrames
+        self.interval = interval
         self.photos = photos
 
         self.time = time.time()
@@ -81,14 +83,14 @@ class FaceRecognizerWindow(QtGui.QMainWindow, form_class):
         self.timer.start(1)
 
     def update_frame(self):
-        currentTime =  time.time()
+        currentTime = time.time()
         # print len(self.photos)
-        if len(self.photos) == 8:
+        if len(self.photos) == self.noOfFrames:
             self.capture.release()
             cv2.destroyAllWindows()
             QtCore.QCoreApplication.instance().quit()
 
-        if len(self.photos) == 8:
+        if len(self.photos) == self.noOfFrames:
             # Because of latency in closing this function might called even quit is called.
             return
 
@@ -108,7 +110,7 @@ class FaceRecognizerWindow(QtGui.QMainWindow, form_class):
                 (x, y, w, h) = getBigRectangle(faces)
                 cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
                 # self.photos.append((x, y, w, h))
-                if currentTime - self.time >= 2:
+                if currentTime - self.time >= self.interval:
                     self.photos.append(gray[y:y + h, x:x + w])
                     self.time = time.time()
 
@@ -131,7 +133,7 @@ class FaceRecognizerWindow(QtGui.QMainWindow, form_class):
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     Photos = []
-    w = FaceRecognizerWindow(Photos, None)
+    w = FaceRecognizerWindow(Photos, 4, 2, None)
     w.setWindowTitle('Face Recognizer')
     w.show()
     app.exec_()
