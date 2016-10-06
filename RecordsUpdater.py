@@ -7,7 +7,6 @@ from JsonExtractor import *
 
 import HttpServer
 
-print HttpServer.port,HttpServer.host
 class RecordsUpdater:
     def __init__(self):
         self.__userName = "superman"
