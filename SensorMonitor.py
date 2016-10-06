@@ -6,17 +6,18 @@ from JsonExtractor import *
 from BahmniServerHelper import BahmniServerHelper
 # from HttpServer import host, port
 import HttpServer
+import RecordsUpdater
 
 port = "/dev/cu.usbmodem1421"
 baudRate = 9600
-
-threshold = 90
-uname = "superman"
-pswd = "Admin123"
+userName = "superman"
+password = "Admin123"
 
 print "Monitoring temperature"
 
 ser = serial.Serial(port, baudRate)
+
+thresholdValue = 90
 
 
 def getAbsoluteTemperatureFromSerial():
@@ -33,7 +34,7 @@ def getAverageValue():
 
 def recognizePatientAndUpdateObservation(key, avgValue):
     print "Firing request to recognize patient"
-    #print HttpServer.host,HttpServer.port
+    # print HttpServer.host,HttpServer.port
     conn = httplib.HTTPConnection(HttpServer.host, HttpServer.port)
     # print conn
     conn.request("GET", "/predict")
@@ -44,18 +45,18 @@ def recognizePatientAndUpdateObservation(key, avgValue):
 
     uuid = result.split()[2]
 
-    payload = setObservationValue(uuid, key, avgValue, payloadTemperature)
-    print "Saving in Bahmni =>", uuid, avgValue, #, "=>", payload
+    payload = setObservationValue(uuid, key, avgValue)
+    print "Saving in Bahmni =>", uuid, avgValue,  # , "=>", payload
     # print payload
     headers = {"Content-type": "application/json;charset=UTF-8",
-               'Cookie': BahmniServerHelper().getAuthenticatedCookie(uname, pswd)}
+               'Cookie': BahmniServerHelper().getAuthenticatedCookie(userName, password)}
     # print headers
     conn = httplib.HTTPSConnection("192.168.33.10", context=ssl._create_unverified_context())
     conn.request("POST", "/openmrs/ws/rest/v1/bahmnicore/bahmniencounter", payload, headers)
     response = conn.getresponse()
     respBody = response.read()
     # print respBody
-    print "Response => ", response.status#, "=>", respBody
+    print "Response => ", response.status  # , "=>", respBody
     conn.close()
     # print "saved in Bahmni"
     time.sleep(3)
@@ -65,15 +66,17 @@ def recognizePatientAndUpdateObservation(key, avgValue):
 
 while True:
     value = getAbsoluteTemperatureFromSerial()
-    isValid = value > threshold
+    isValid = value > thresholdValue
     if isValid:
         print "calculating avg temp =>"
         avgValue = getAverageValue()
         print avgValue
-        recognizePatientAndUpdateObservation('Temperature', avgValue)
+        recordsUpdater = RecordsUpdater.RecordsUpdater()
+        recordsUpdater.updateLatestRecords('Temperature', avgValue)
+        # recognizePatientAndUpdateObservation('Temperature', avgValue)
         isValid = False
         value = getAbsoluteTemperatureFromSerial()
-        while value > threshold:
+        while value > thresholdValue:
             print "Resetting sensor temperature, current=>%.2f" % value
             time.sleep(3)
             value = getAbsoluteTemperatureFromSerial()

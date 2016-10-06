@@ -6,7 +6,7 @@ import numpy as np
 import time
 
 form_class = uic.loadUiType("simple.ui")[0]
-xml_file = "/usr/local/Cellar/opencv3/3.1.0_4/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml"
+xml_file = "/usr/local/Cellar/opencv3/3.1.0_3/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml"
 
 
 class Recognizer:

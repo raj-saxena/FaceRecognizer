@@ -21,8 +21,9 @@ def getObservationValue(key, jsonString=payloadTemperatureAndPulse):
 # 		'observations' \ groupMembers(where label=key) \ primaryObs \ value
 # 		'observations' \ groupMembers(where label=key) \ primaryObs \ _value
 # 		'observations' \ groupMembers(where label=key) \ primaryObs \ autocompleteValue
-def setObservationValue(uuid, key, value, payloadStr=payloadTemperatureAndPulse):
-    payload = json.loads(payloadStr)
+def setObservationValue(uuid, key, value):
+    # global payloadTemperature
+    payload = json.loads(payloadTemperature)
     payload['patientUuid'] = uuid
     for observation in payload['observations']:
         if observation['label'] == "Vitals":

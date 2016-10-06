@@ -11,15 +11,13 @@ from FaceRecognizer import Recognizer, FaceRecognizerWindow
 from PyQt4 import QtGui
 from multiprocessing import Process, Manager
 
-host = "10.136.21.206"  # Change this to machine IP
+host = "10.136.22.28"  # Change this to machine IP
 port = 8080
 
 
 @hook('after_request')
 def enable_cors():
     response.headers['Access-Control-Allow-Origin'] = '*'
-
-
 db = DB()
 
 
