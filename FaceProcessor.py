@@ -3,7 +3,8 @@ from collections import Counter
 import cv2
 import numpy as np
 
-from FaceRecognizer import Recognizer, FaceRecognizerWindow
+from FaceRecognizer import Recognizer
+from FaceRecognizerWindow import FaceRecognizerWindow
 
 from PyQt4 import QtGui
 

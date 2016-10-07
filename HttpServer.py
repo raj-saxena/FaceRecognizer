@@ -5,13 +5,15 @@ from multiprocessing import Process, Manager
 from DB import DB
 import sqlite3
 
-host = "10.136.22.28"  # Change this to machine IP
+host = "10.136.22.231"  # Change this to machine IP
 port = 8080
 db = DB()
+
 
 @hook('after_request')
 def enable_cors():
     response.headers['Access-Control-Allow-Origin'] = '*'
+
 
 @route('/train')
 def train():
@@ -44,6 +46,7 @@ def predict():
         returnString = "You are %s" % (result[0],)
         return returnString
     return "Unable to Recognize You"
+
 
 if __name__ == '__main__':
     run(host=host, port=port, debug=True)
