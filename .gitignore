@@ -3,3 +3,4 @@
 learnedData
 FaceRecognizer.db
 *.pyc
+*.yml
