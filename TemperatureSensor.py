@@ -29,7 +29,7 @@ class TemperatureSensor:
         averageTemperature = self.getAverageValue()
         self.consoleOutput(averageTemperature)
         recordsUpdater = RecordsUpdater()
-        recordsUpdater.updateLatestRecords('Temperature', averageTemperature)
+        recordsUpdater.update('Temperature', averageTemperature)
         self.__isValid = False
         time.sleep(3)
 

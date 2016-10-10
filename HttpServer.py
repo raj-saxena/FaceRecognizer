@@ -45,7 +45,7 @@ def predict():
     if result is not None:
         returnString = "You are %s" % (result[0],)
         return returnString
-    return "Unable to Recognize You"
+    return "UnRegistered"
 
 
 if __name__ == '__main__':
