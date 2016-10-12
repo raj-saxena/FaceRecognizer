@@ -28,16 +28,16 @@ def recognizeFace(predictedFace):
 def trainForFace(label):
     photos = readFrames("Train", 8, 2)
     labels = [label for i in range(len(photos))]
-    faceRecognizer.update(photos, np.array(labels))
+    faceRecognizer.update(photos, labels)
     cv2.destroyAllWindows()
     print "captured and trained for => " + str(labels)
 
 
-def readFrames(Message, numberOfFrames, delay):
-    app = QtGui.QApplication([Message])
+def readFrames(Title, numberOfFrames, delay):
+    app = QtGui.QApplication([Title])
     photos = []
     w = FaceRecognizerWindow(photos, numberOfFrames, delay, None)
-    w.setWindowTitle('Face Recognizer')
+    w.setWindowTitle(Title)
     w.show()
     app.exec_()
     return photos
