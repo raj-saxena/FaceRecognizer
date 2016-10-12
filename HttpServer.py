@@ -5,9 +5,9 @@ import sqlite3
 
 from Constants import HOST_IP
 from Constants import HOST_PORT
-from DB import DB
+from MapDataBase import MapDataBase
 
-db = DB()
+db = MapDataBase()
 
 
 @hook('after_request')

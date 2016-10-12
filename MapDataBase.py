@@ -1,7 +1,7 @@
 import sqlite3
 
 
-class DB:
+class MapDataBase:
     connection = sqlite3.connect('FaceRecognizer.db')
 
     def __init__(self):
