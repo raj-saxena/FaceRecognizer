@@ -14,6 +14,7 @@ class Recognizer:
 
     def update(self, images, labels):
         # images and labels are of type `array`
+        self.recognizer.load(self.file)
         self.recognizer.update(images, np.array(labels))
         self.recognizer.save(self.file)
 
