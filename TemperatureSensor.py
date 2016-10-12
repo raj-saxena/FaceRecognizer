@@ -3,8 +3,8 @@ import time
 import serial
 from RecordsUpdater import RecordsUpdater
 
-from Values import SERIAL_PORT
-from Values import BAUD_RATE
+from Constants import SERIAL_PORT
+from Constants import BAUD_RATE
 
 
 class TemperatureSensor:

@@ -4,7 +4,7 @@ from PyQt4 import QtGui
 
 from FaceRecognizer import Recognizer
 from FaceRecognizerWindow import FaceRecognizerWindow
-from Values import LEARNED_DATA_FILE
+from Constants import LEARNED_DATA_FILE
 
 faceRecognizer = Recognizer(LEARNED_DATA_FILE)
 

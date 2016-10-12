@@ -3,7 +3,7 @@ import sys
 import cv2
 import time
 
-from Values import FRONTAL_FACE_XML_FILE
+from Constants import FRONTAL_FACE_XML_FILE
 
 
 form_class = uic.loadUiType("simple.ui")[0]

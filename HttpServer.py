@@ -3,8 +3,8 @@ from FaceProcessor import recognizeFace, trainForFace
 from multiprocessing import Process, Manager
 import sqlite3
 
-from Values import HOST_IP
-from Values import HOST_PORT
+from Constants import HOST_IP
+from Constants import HOST_PORT
 from DB import DB
 
 db = DB()

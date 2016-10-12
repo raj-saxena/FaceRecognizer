@@ -4,8 +4,8 @@ import ssl
 from BahmniServerHelper import BahmniServerHelper
 from JsonExtractor import *
 
-from Values import HOST_IP
-from Values import HOST_PORT
+from Constants import HOST_IP
+from Constants import HOST_PORT
 
 class RecordsUpdater:
     def __init__(self):
