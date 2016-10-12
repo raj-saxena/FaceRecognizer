@@ -1,12 +1,12 @@
 from bottle import route, run, hook, response, request
 from FaceProcessor import recognizeFace, trainForFace
 from multiprocessing import Process, Manager
-
-from DB import DB
 import sqlite3
 
-host = "10.136.23.81"  # Change this to machine IP
-port = 8080
+from Values import HOST_IP
+from Values import HOST_PORT
+from DB import DB
+
 db = DB()
 
 
@@ -49,4 +49,4 @@ def predict():
 
 
 if __name__ == '__main__':
-    run(host=host, port=port, debug=True)
+    run(host=HOST_IP, port=HOST_PORT, debug=True)

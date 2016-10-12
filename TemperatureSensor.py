@@ -3,6 +3,10 @@ import time
 import serial
 from RecordsUpdater import RecordsUpdater
 
+from Values import SERIAL_PORT
+from Values import BAUD_RATE
+
+
 class TemperatureSensor:
     def __init__(self, serialInput):
         self.__serialInput = serialInput
@@ -49,5 +53,6 @@ class TemperatureSensor:
     def consoleOutput(self, message):
         print message
 
-temperatureSensor = TemperatureSensor(serial.Serial("/dev/cu.usbmodem1421", 9600))
+
+temperatureSensor = TemperatureSensor(serial.Serial(SERIAL_PORT, BAUD_RATE))
 temperatureSensor.read()

@@ -1,15 +1,12 @@
-from collections import Counter
-
 import cv2
-import numpy as np
+from collections import Counter
+from PyQt4 import QtGui
 
 from FaceRecognizer import Recognizer
 from FaceRecognizerWindow import FaceRecognizerWindow
+from Values import LEARNED_DATA_FILE
 
-from PyQt4 import QtGui
-
-file = 'learnedData.yml'
-faceRecognizer = Recognizer(file)
+faceRecognizer = Recognizer(LEARNED_DATA_FILE)
 
 
 def recognizeFace(predictedFace):

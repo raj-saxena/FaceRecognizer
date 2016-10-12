@@ -3,7 +3,8 @@ import sys
 import cv2
 import time
 
-xml_file = "/usr/local/Cellar/opencv3/3.1.0_4/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml"
+from Values import FRONTAL_FACE_XML_FILE
+
 
 form_class = uic.loadUiType("simple.ui")[0]
 
@@ -32,7 +33,7 @@ class FaceRecognizerWindow(QtGui.QMainWindow, form_class):
         QtGui.QMainWindow.__init__(self, parent, QtCore.Qt.WindowStaysOnTopHint)
         self.setupUi(self)
 
-        self.faceCascade = cv2.CascadeClassifier(xml_file)
+        self.faceCascade = cv2.CascadeClassifier(FRONTAL_FACE_XML_FILE)
 
         self.capture = cv2.VideoCapture(0)
         self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
