@@ -4,7 +4,8 @@ import ssl
 from BahmniServerHelper import BahmniServerHelper
 from JsonExtractor import *
 
-import HttpServer
+from Values import HOST_IP
+from Values import HOST_PORT
 
 class RecordsUpdater:
     def __init__(self):
@@ -26,7 +27,7 @@ class RecordsUpdater:
 
     def getUUIDOfPatient(self):
         self.consoleOutput("Firing request to recognize patient")
-        httpConnection = httplib.HTTPConnection(HttpServer.host, HttpServer.port)
+        httpConnection = httplib.HTTPConnection(HOST_IP, HOST_PORT)
         httpConnection.request("GET", "/predict")
         httpResponse = httpConnection.getresponse()
         result = httpResponse.read()
