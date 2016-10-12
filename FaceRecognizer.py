@@ -9,10 +9,11 @@ class Recognizer:
         self.recognizer = cv2.face.createLBPHFaceRecognizer()
         if not os.path.isfile(self.file):
             print 'init'
-            self.recognizer.save(fname)
-        self.recognizer.load(fname)
+            self.recognizer.save(self.file)
+        self.recognizer.load(self.file)
 
     def update(self, images, labels):
+        # images and labels are of type `array`
         self.recognizer.update(images, np.array(labels))
         self.recognizer.save(self.file)
 
