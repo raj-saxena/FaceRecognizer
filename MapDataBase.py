@@ -2,9 +2,9 @@ import sqlite3
 
 
 class MapDataBase:
-    connection = sqlite3.connect('FaceRecognizer.db')
 
-    def __init__(self):
+    def __init__(self,db_file_name):
+        self.connection = sqlite3.connect(db_file_name)
         self.dbCursor = self.connection.cursor()
         self.dbCursor.execute("CREATE TABLE IF NOT EXISTS users( mapped_id INTEGER PRIMARY KEY AUTOINCREMENT, "
                               "uuid TEXT NOT NULL UNIQUE );")

@@ -5,9 +5,7 @@ import sqlite3
 
 from Constants import HOST_IP
 from Constants import HOST_PORT
-from MapDataBase import MapDataBase
-
-db = MapDataBase()
+from Constants import DataBase
 
 
 @hook('after_request')
@@ -22,7 +20,7 @@ def train():
     if not uuid:
         return "Invalid Action"  # Empty string is False
     try:
-        mappedId = db.add(uuid)
+        mappedId = DataBase.add(uuid)
         p = Process(target=trainForFace, args=(mappedId,))
         p.start()
         return "Trained for " + uuid + " =>" + str(mappedId)
@@ -39,7 +37,7 @@ def predict():
     p.join()
 
     predictedId = predicted.value
-    result = db.getUuid(predictedId)
+    result = DataBase.getUuid(predictedId)
 
     print 'result', result
     if result is not None:

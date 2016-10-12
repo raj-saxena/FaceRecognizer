@@ -8,3 +8,11 @@ FRONTAL_FACE_XML_FILE = "haarcascade_frontalface_default.xml"
 
 SERIAL_PORT = "/dev/cu.usbmodem1421"
 BAUD_RATE = 9600
+
+from MapDataBase import MapDataBase
+
+DataBase = MapDataBase(DATABASE_FILE)
+
+from FaceRecognizer import Recognizer
+
+faceRecognizer = Recognizer(LEARNED_DATA_FILE)
