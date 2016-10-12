@@ -5,7 +5,7 @@ from multiprocessing import Process, Manager
 from DB import DB
 import sqlite3
 
-host = "10.136.22.231"  # Change this to machine IP
+host = "10.136.23.81"  # Change this to machine IP
 port = 8080
 db = DB()
 
