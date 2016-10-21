@@ -1,6 +1,5 @@
 from bottle import route, run, hook, response, request
 from FaceProcessor import recognizeFace, trainForFace
-from multiprocessing import Process, Manager
 import sqlite3
 
 from Constants import HOST_IP
@@ -21,8 +20,7 @@ def train():
         return "Invalid Action"  # Empty string is False
     try:
         mappedId = DataBase.add(uuid)
-        p = Process(target=trainForFace, args=(mappedId,))
-        p.start()
+        trainForFace(mappedId)
         return "Trained for " + uuid + " =>" + str(mappedId)
     except sqlite3.IntegrityError:
         print "User with uuid=%s already exists,"  # initiating re-training."
@@ -31,12 +29,7 @@ def train():
 
 @route('/predict')
 def predict():
-    predicted = Manager().Value('i', 0)
-    p = Process(target=recognizeFace, args=(predicted,))
-    p.start()
-    p.join()
-
-    predictedId = predicted.value
+    predictedId = recognizeFace()
     result = DataBase.getUuid(predictedId)
 
     print 'result', result

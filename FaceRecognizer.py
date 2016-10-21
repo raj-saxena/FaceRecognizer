@@ -14,12 +14,10 @@ class Recognizer:
 
     def update(self, images, labels):
         # images and labels are of type `array`
-        self.recognizer.load(self.file)
         self.recognizer.update(images, np.array(labels))
         self.recognizer.save(self.file)
 
     def predict(self, photos):
-        self.recognizer.load(self.file)
         predicted = list()
         for photo in photos:
             # for openCV >= 3.0.0
@@ -29,7 +27,7 @@ class Recognizer:
             conf = result.getDist()
             print nbr_predicted, "is predicted with confidance ", conf
             nbr_predicted2 = self.recognizer.predict(photo)
-            print "nbr_predicted2 ",nbr_predicted2
+            print "nbr_predicted2 ", nbr_predicted2
             # nbr_predicted, conf = self.recognizer.predict(photo)
             nbr_predicted = self.recognizer.predict(photo)
             predicted.append(nbr_predicted)

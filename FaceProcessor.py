@@ -1,37 +1,50 @@
-import cv2
 from collections import Counter
 from PyQt4 import QtGui
+from multiprocessing import Process, Manager
 
 from FaceRecognizerWindow import FaceRecognizerWindow
 from Constants import faceRecognizer
 
 
-def recognizeFace(predictedFace):
-    predictedFace.value = None
-    photos = readFrames("Test", 4, 2)
+def recognizeFace():
+    predictedFace = 0
+    photos = getPhotos("Test", 4, 2)
     print photos
     if len(photos) != 0:
         predicted = faceRecognizer.predict(photos)
         data = Counter(predicted)
         print "Predicted", data.most_common(1)[0][0]
-        predictedFace.value = data.most_common(1)[0][0]
-    cv2.destroyAllWindows()
+        predictedFace = data.most_common(1)[0][0]
     return predictedFace
 
 
 def trainForFace(label):
-    photos = readFrames("Train", 8, 2)
+    photos = getPhotos("Train", 8, 2)
     labels = [label for i in range(len(photos))]
     faceRecognizer.update(photos, labels)
-    cv2.destroyAllWindows()
     print "captured and trained for => " + str(labels)
 
 
-def readFrames(Title, numberOfFrames, delay):
-    app = QtGui.QApplication([Title])
+def getPhotos(Title, numberOfFrames, delay):
+    manager = Manager()
+    sharedList = manager.list()
+    p = Process(target=readFrames, args=(Title, numberOfFrames, delay, sharedList,))
+    p.start()
+    p.join()
+    return list(sharedList)
+
+
+def readFrames(Title, numberOfFrames, delay, sharedList):
     photos = []
+    app = QtGui.QApplication([Title])
     w = FaceRecognizerWindow(photos, numberOfFrames, delay, None)
     w.setWindowTitle(Title)
     w.show()
     app.exec_()
-    return photos
+    for w in photos:
+        sharedList.append(w)
+
+
+if __name__ == '__main__':
+    pass
+    # trainForFace(1)
