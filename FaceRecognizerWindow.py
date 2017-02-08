@@ -109,7 +109,7 @@ class FaceRecognizerWindow(QtGui.QMainWindow, form_class):
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     Photos = []
-    w = FaceRecognizerWindow(Photos, 4, 2, None)
+    w = FaceRecognizerWindow(Photos, 15, 2, None)
     w.setWindowTitle('Face Recognizer')
     w.show()
     app.exec_()
@@ -117,6 +117,8 @@ if __name__ == '__main__':
     print Photos
 
     cv2.namedWindow('frame')
+    i=0
     for photo in Photos:
-        cv2.imshow('frame', photo)
-        cv2.waitKey(60)
+        cv2.imwrite('frame'+str(i)+".png", photo)
+        i+=1
+        # cv2.waitKey(60)
