@@ -21,14 +21,15 @@ class Recognizer:
         predicted = list()
         for photo in photos:
             # for openCV >= 3.0.0
+            # result = cv2.face.MinDistancePredictCollector(20)
             result = cv2.face.MinDistancePredictCollector()
-            self.recognizer.predict(photo, result, 0)
+            self.recognizer.predict(photo, result,0)
             nbr_predicted = result.getLabel()
+            predicted.append(nbr_predicted)
             conf = result.getDist()
-            print nbr_predicted, "is predicted with confidance ", conf
+            print nbr_predicted, "is predicted with distance ", conf
             nbr_predicted2 = self.recognizer.predict(photo)
             print "nbr_predicted2 ", nbr_predicted2
             # nbr_predicted, conf = self.recognizer.predict(photo)
             nbr_predicted = self.recognizer.predict(photo)
-            predicted.append(nbr_predicted)
         return predicted
