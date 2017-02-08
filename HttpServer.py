@@ -30,6 +30,8 @@ def train():
 @route('/predict')
 def predict():
     predictedId = recognizeFace()
+    # if predictedId==0:
+    #     return "UnRegistered"
     result = DataBase.getUuid(predictedId)
 
     print 'result', result
@@ -37,6 +39,7 @@ def predict():
         returnString = "You are %s" % (result[0],)
         return returnString
     return "UnRegistered"
+
 
 
 if __name__ == '__main__':
