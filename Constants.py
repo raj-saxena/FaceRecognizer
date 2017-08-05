@@ -1,5 +1,5 @@
 # Update with your computer's IP address.
-HOST_IP = "10.136.20.92"
+HOST_IP = "10.136.21.56"
 HOST_PORT = 8080
 
 DATABASE_FILE = "FaceRecognizer.db"

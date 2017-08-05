@@ -102,7 +102,7 @@ class FaceRecognizerWindow(QtGui.QMainWindow, form_class):
         self.ImgWidget.setImage(image)
 
     def getBigRectangle(self, faces):
-        print max(faces, key=lambda (x, y, w, h): (w) * (h))
+        # print max(faces, key=lambda (x, y, w, h): (w) * (h))
         return max(faces, key=lambda (x, y, w, h): (w) * (h))
 
 

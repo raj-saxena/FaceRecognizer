@@ -27,9 +27,9 @@ class Recognizer:
             nbr_predicted = result.getLabel()
             predicted.append(nbr_predicted)
             conf = result.getDist()
-            print nbr_predicted, "is predicted with distance ", conf
+            # print nbr_predicted, "is predicted with distance ", conf
             nbr_predicted2 = self.recognizer.predict(photo)
-            print "nbr_predicted2 ", nbr_predicted2
+            # print "nbr_predicted2 ", nbr_predicted2
             # nbr_predicted, conf = self.recognizer.predict(photo)
             nbr_predicted = self.recognizer.predict(photo)
         return predicted
